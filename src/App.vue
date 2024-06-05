@@ -11,13 +11,20 @@
         class="white--text"
       ></v-toolbar-side-icon>
       <v-toolbar-title class="white--text">News App</v-toolbar-title>
+      <div class="btn-right-top">
+        <!-- Используйте router-link для ссылки на страницу с ключевыми словами -->
+        <router-link :to="{ name: 'keywords' }" class="btn-right-top">
+          Navi
+        </router-link>
+      </div>
       <div class="row">
         <app-search v-on:newsChanged="getNews"></app-search>
       </div>
     </v-toolbar>
     <v-content>
       <v-container fluid>
-        <MainContent :articles="articles"></MainContent>
+        <MainContent :articles="articles" @showDetails="showDetails">
+        </MainContent>
       </v-container>
     </v-content>
     <v-footer class="secondary" app>
@@ -35,12 +42,29 @@
               class="white--text"
               href="https://github.com/rachidsakara"
               target="_blank"
-              >Rachid Sakara</a
+              >Mendy</a
             >
           </div>
         </v-flex>
       </v-layout>
     </v-footer>
+
+    <!-- Модальное окно -->
+    <v-dialog v-model="dialog" max-width="600">
+      <v-card>
+        <v-card-title class="headline">{{
+          selectedArticle.title
+        }}</v-card-title>
+        <v-img :src="selectedArticle.urlToImage" height="200px"></v-img>
+        <v-card-text>{{ selectedArticle.content }}</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="dialog = false"
+            >Закрыть</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 <script>
@@ -61,6 +85,9 @@ export default {
       articles: [],
       searchQ: "",
       errors: [],
+      dialog: false,
+      selectedArticle: {},
+      selectedArticle: {},
     };
   },
   created() {
@@ -77,9 +104,26 @@ export default {
       .catch((e) => {
         this.errors.push(e);
       });
+    {
+      this.fetchTopHeadlines();
+    }
   },
 
   methods: {
+    fetchTopHeadlines() {
+      axios
+        .get(
+          "https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=" +
+            this.api_key
+        )
+        .then((response) => {
+          this.articles = response.data.articles;
+          this.filteredArticles = this.articles;
+        })
+        .catch((error) => {
+          this.errors.push(error);
+        });
+    },
     setResource(source) {
       axios
         .get(
@@ -118,90 +162,13 @@ export default {
           this.errors.push(e);
         });
     },
+    showDetails(article) {
+      this.selectedArticle = article;
+      this.dialog = true;
+    },
     mounted: function () {
       this.getNews(this.searchQ);
     },
   },
 };
 </script>
-
-<!-- <template>
-  <v-app light>
-    <SideMenu
-      :drawer="drawer"
-      :api_key="apiKey"
-      @selectsource="setResource"
-    ></SideMenu>
-    <v-toolbar fixed app light clipped-left color="primary" class="elevation-2">
-      <v-toolbar-side-icon
-        @click="toggleDrawer"
-        class="white--text"
-      ></v-toolbar-side-icon>
-      <v-toolbar-title class="white--text">News App</v-toolbar-title>
-      <div class="row">
-        <app-search @search="searchNews"> </app-search>
-      </div>
-    </v-toolbar>
-    <v-content>
-      <v-container fluid>
-        <MainContent :articles="articles"></MainContent>
-      </v-container>
-    </v-content>
-    <v-footer class="secondary" app>
-      <v-layout row wrap align-center>
-        <v-flex xs12>
-          <div class="white--text ml-3">
-            Made with
-            <v-icon class="red--text">favorite</v-icon>
-            by
-            <a class="white--text" href="https://vuetifyjs.com" target="_blank"
-              >Vuetify</a
-            >
-            and
-            <a
-              class="white--text"
-              href="https://github.com/rachidsakara"
-              target="_blank"
-              >Rachid Sakara</a
-            >
-          </div>
-        </v-flex>
-      </v-layout>
-    </v-footer>
-  </v-app>
-</template>
-
-<script>
-import { mapState, mapMutations, mapActions } from "vuex";
-import MainContent from "./components/MainContent.vue";
-import SideMenu from "./components/SideMenu.vue";
-import Search from "./components/Search.vue";
-
-export default {
-  components: {
-    MainContent,
-    SideMenu,
-    "app-search": Search,
-  },
-  computed: {
-    ...mapState(["drawer", "articles", "apiKey", "searchQuery"]),
-  },
-  created() {
-    this.fetchTopHeadlines();
-  },
-
-  methods: {
-    searchNews(query) {
-      this.$store.dispatch("fetchNewsByQuery", query);
-    },
-    ...mapMutations(["SET_DRAWER"]),
-    ...mapActions(["fetchTopHeadlines"]),
-    setResource(resource) {
-      this.SET_SOURCE(resource);
-    },
-    toggleDrawer() {
-      this.SET_DRAWER(!this.drawer);
-    },
-  },
-};
-</script> -->

@@ -44,6 +44,9 @@
               target="_blank"
               >Read More</v-btn
             >
+            <v-btn small color="primary" @click="$emit('showDetails', article)"
+              >Show Details</v-btn
+            >
           </v-card-actions>
         </v-card>
       </div>
@@ -58,3 +61,17 @@ export default {
   },
 };
 </script>
+
+<style>
+.popup {
+  padding: 16px;
+  position: fixed;
+  top: 50px;
+  width: 400px;
+  background: #ffffff;
+  box-shadow: 0 0 17px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+</style>

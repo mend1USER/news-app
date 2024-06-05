@@ -76,7 +76,6 @@ export default {
 @tailwind components;
 @tailwind utilities;
 
-/* Добавьте ваши пользовательские стили */
 .scrollbar-w-6 {
   width: 6px;
 }
